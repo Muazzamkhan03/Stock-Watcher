@@ -2,6 +2,49 @@ let tickers = JSON.parse(localStorage.getItem('tickers')) || [];
 let lastPrices = {};
 let counter = 60;
 
+
+const populateDropdown = (data) => {
+    data = data.slice(0,20); //Slicing the data, for now
+
+    const dropdown = document.getElementById('ticker-select');
+
+    data.forEach((ticker) => {
+        const option = document.createElement('option');
+        option.value = ticker.symbol;
+        option.text = ticker.symbol + " : " + ticker.name;
+        dropdown.appendChild(option);
+    });
+    const option = document.createElement('option');
+        option.value = "other";
+        option.text = "Other";
+        dropdown.appendChild(option);
+}
+
+const toggleTickerInput = () => {
+    const tickerIn = $('#ticker-in');
+    const tickerSelect = $('#ticker-select');
+    if (tickerSelect.val() === 'other') {
+        tickerIn.show();
+    } else {
+        tickerIn.hide();
+    }
+}
+
+// Function to fetch JSON data asynchronously
+const fetchJSONData = async () => {
+    try {
+        const response = await fetch('/data');
+        if (!response.ok) {
+            throw new Error('Error fetching tickers');
+        }
+        const data = await response.json();
+        populateDropdown(data);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
 const startUpdateCycle = () => {
     updatePrices();
     setInterval(()=>{
@@ -76,15 +119,26 @@ const updatePrices = () => {
 }
 
 $(document).ready(()=>{
+    fetchJSONData();
+    toggleTickerInput();
+
     tickers.forEach((ticker) => {
         addTickerToGrid(ticker);
     });
 
     updatePrices();
 
+    $('#ticker-select').on('change', toggleTickerInput);
+
     $('#ticker-form').submit((event) => {
         event.preventDefault();
-        let newTicker = $('#ticker-in').val().toUpperCase();
+
+        let newTicker = $('#ticker-select').val();
+        console.log(newTicker);
+        if (newTicker === 'other') {
+            newTicker = $('#ticker-in').val().toUpperCase();
+        }
+
         if(!tickers.includes(newTicker)){
             tickers.push(newTicker);
             localStorage.setItem('tickers', JSON.stringify(tickers));
@@ -92,6 +146,8 @@ $(document).ready(()=>{
         }
         
         $('#ticker-in').val('');
+        $('#tickerSelect').val('');
+        $('#ticker-in').hide();
         updatePrices();
     });
     

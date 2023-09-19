@@ -14,7 +14,9 @@
 <body>
     <h1>Stock Price Tracker</h1>
     <form id="ticker-form">
-        <input type="text" name="ticker-in" id="ticker-in" placeholder="Add Ticker" required>
+        <select id="ticker-select" name="ticker-select">
+        </select>
+        <input type="text" name="ticker-in" id="ticker-in" placeholder="Add Ticker">
         <button type="submit">Add</button>
     </form>
     <p id="timer">Next update in: <span id="counter"></span> seconds</p>
